@@ -1,0 +1,21 @@
+<center><h2>Socket.io Private Chat</h2></center>
+<h3>Hey, <a href="/profile">{{username}}</a></h3>
+<div class="users-panel">
+  <b>Users online</b>
+  <div id="users"></div>
+</div>
+<div class="messages-panel">
+  <div id="conversation"></div>
+</div>
+<div id="chat-area">
+  <div class="send-form">
+    <input id="message" />
+    <input type="button" id="message-send" value="SEND" />
+  </div>
+</div>
+<script>
+  {{#if username}}
+    window.username = {{{json username}}};
+  {{/if}}
+</script>
+<script src="client.js"></script>

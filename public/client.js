@@ -19,18 +19,34 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-var socket = io.connect();
+const socket = io.connect();
 
-function openPrivateChat(url) {
-  // url = 'private';
-  // const win = window.open('/' + url, '_blank');
-  // win.focus();
+function getFormattedDate(date = null) {
+  const newDate = date ? new Date(date) : new Date();
 
-  socket.emit('joinPrivateRoom', myUsername, 'private');
+  let formattedDate = '';
+
+  formattedDate += ("0" + (newDate.getMonth() + 1)).slice(-2) + "-";  
+  formattedDate += ("0" + newDate.getDate()).slice(-2) + " ";
+  formattedDate += ("0" + newDate.getHours()).slice(-2) + ":";
+  formattedDate += ("0" + newDate.getMinutes()).slice(-2) + ":";
+  formattedDate += ("0" + newDate.getSeconds()).slice(-2);
+
+  return formattedDate;
 }
 
-function sendIndividualMsg(id) {
-  socket.emit('privateMessage', myUsername, id);
+function appendMessageToChat(username, message, systemMessage = false) {
+  console.log(systemMessage)
+  let msg = document.createElement("span");
+  let messageText = '';
+  if (systemMessage === true) {
+    console.log('bejottem true')
+    messageText = `<div class="system-message"><b>***</b> ${message}</div>`;
+  } else {
+    messageText = `<b>${username}:</b> ${message}`;
+  }
+  msg.innerHTML = `<div class="date">[${getFormattedDate()}]</div>${messageText}<br>`;
+  conversationDOM.appendChild(msg);
 }
 
 function sendMessage() {
@@ -49,34 +65,29 @@ socket.on('connect', () => {
   socket.emit('join', myUsername);
 });
 
-socket.on('updateMessages', (from, to, data) => {
-  var msg = document.createElement("span");
-  msg.innerHTML = `<b>${from} -> ${to}:</b> ${data}<br>`;
-  conversationDOM.appendChild(msg);
+socket.on('addMessage', (username, message) => {
+  appendMessageToChat(username, message);
 });
 
-socket.on('userFound', (username) => {
-  socket.emit('messageUser', username, myUsername, prompt('Type your message:'));
+socket.on('systemMessage', (message) => {
+  let systemMessage = true;
+  let username = null;
+  appendMessageToChat(username, message, systemMessage);
 });
 
-socket.on('updateChat', (username, message) => {
-  let msg = document.createElement("span");
-  msg.innerHTML = `<b>${username}:</b> ${message}<br>`;
-  conversationDOM.appendChild(msg);
-});
-
-socket.on('updateChatHistory', (chatHistories) => {
-  chatHistories.forEach((item) => {
+socket.on('renderChatHistory', (chatHistories) => {
+  conversationDOM.innerHTML = '';
+  chatHistories.forEach((history) => {
     let msg = document.createElement("span");
-    msg.innerHTML = `<b>${item.user}:</b> ${item.message}<br>`;
+    msg.innerHTML = `<div class="date">[${getFormattedDate(history.ts)}]</div><b>${history.user}:</b> ${history.message}<br>`;
     conversationDOM.appendChild(msg);
   });
 });
 
-socket.on('updateUsers', (users) => {
+socket.on('renderUsers', (users) => {
   usersDOM.innerHTML = '';
 
-  for (var key in users) {
+  for (let key in users) {
     let user = document.createElement("span");
     user.innerHTML = `<div class="user" onclick="openPrivateChat('${users[key]}')">${key}</div>`;
     usersDOM.appendChild(user);

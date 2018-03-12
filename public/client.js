@@ -40,7 +40,6 @@ function appendMessageToChat(username, message, systemMessage = false) {
   let msg = document.createElement("span");
   let messageText = '';
   if (systemMessage === true) {
-    console.log('bejottem true')
     messageText = `<div class="system-message"><b>***</b> ${message}</div>`;
   } else {
     messageText = `<b>${username}:</b> ${message}`;

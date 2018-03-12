@@ -7,7 +7,6 @@ function redirectToProfile(req, res) {
 }
 
 function login(req, res) {
-  console.log('bejotttem');
   req.session.key = req.body.username;
   res.redirect('/profile');
 }
